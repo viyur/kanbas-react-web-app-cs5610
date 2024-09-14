@@ -6,6 +6,7 @@ import Labs from './Labs';
 function App() {
   return (
     <div>
+      {/* lab component */}
       <Labs />
     </div>
   );
