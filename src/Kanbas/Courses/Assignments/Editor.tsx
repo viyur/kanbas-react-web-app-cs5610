@@ -1,8 +1,10 @@
 
 import { SlCalender } from "react-icons/sl";
-
-
+import { assignments } from "../../Database";
+import { useParams, Link } from "react-router-dom";
 export default function AssignmentEditor() {
+    const { aid, cid } = useParams();
+    const assignment = assignments.find((assignment: any) => assignment._id === aid);
     return (
         <div id="wd-assignments-editor" className="container py-4">
 
@@ -15,24 +17,12 @@ export default function AssignmentEditor() {
                     type="text"
                     id="wd-name"
                     className="form-control form-control-lg"
-                    value="A1"
+                    value={assignment?.title}
                     readOnly
                 />
             </div>
 
-            {/* Assignment Description */}
-            {/* <div className="mb-4">
-                <div className="mt-3 mb-3">The assignment is available onlineLinks to an external site.</div>
-                <div className="mb-3"> Submit a link to the landing page of your Web application running on Netlify.</div>
-                <div className="mb-3">The landing page should include the following:</div>
-                <div className="mb-3">
-                    <ul>
-                        <li>Your full name and section</li>
-                        <li>Links to each of the lab assignments</li>
-                        <li>Link to the Kanbas application</li>
-                        <li>Links to all relevant source code repositories</li></ul></div>
-                <div>The Kanbas application should include a link to navigate back to the landing page.</div>
-            </div> */}
+
             <div className="mb-4">
                 <div className="card border border-light-subtle rounded">
                     <div className="card-body">
@@ -213,8 +203,8 @@ export default function AssignmentEditor() {
                 </div>
                 <hr style={{ width: "100%", margin: "0" }} className="mt-3" />
                 <div className="mt-3 float-end">
-                    <button type="button" className="btn btn-lg btn-secondary me-1"> Cancel</button>
-                    <button type="button" className="btn btn-lg btn-danger me-1"> Save</button>
+                    <Link to={`/kanbas/courses/${cid}/assignments/`}><button type="button" className="btn btn-lg btn-secondary me-1"> Cancel</button></Link>
+                    <Link to={`/kanbas/courses/${cid}/assignments/`}> <button type="button" className="btn btn-lg btn-danger me-1"> Save</button></Link>
                 </div>
 
             </form>

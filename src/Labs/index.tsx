@@ -15,7 +15,7 @@ export default function Labs() {
             <Routes>
                 <Route path="Lab1" element={<Lab1 />}></Route>
                 <Route path="Lab2" element={<Lab2 />}></Route>
-                <Route path="Lab3" element={<Lab3 />}></Route>
+                <Route path="Lab3/*" element={<Lab3 />}></Route>
             </Routes>
         </div>
     )
