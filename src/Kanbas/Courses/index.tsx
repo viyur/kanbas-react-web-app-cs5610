@@ -5,12 +5,12 @@ import Assignments from "./Assignments";
 import Modules from "./Modules";
 import { FaAlignJustify } from "react-icons/fa";
 import PeopleTable from "./People/Table";
-import AssignmentEditor from "./Assignments/Editor";
-import { courses } from "../Database";
+import AssignmentsEditor from "./Assignments/AssignmentsEditor";
+import AssignmentEditor from "./Assignments/AssignmentEditor";
 
 
 
-export default function Courses() {
+export default function Courses({ courses }: { courses: any[]; }) {
     const { pathname } = useLocation();
     const { cid } = useParams();
     const course = courses.find((course) => course._id === cid);
@@ -34,7 +34,8 @@ export default function Courses() {
                         <Route path="Home" element={<Home />} />
                         <Route path="Modules" element={<Modules />} />
                         <Route path="Assignments" element={<Assignments />} />
-                        <Route path="Assignments/:aid" element={<AssignmentEditor />} />
+                        <Route path="Assignments/add" element={<AssignmentEditor />} />
+                        <Route path="Assignments/:aid" element={<AssignmentsEditor />} />
                         <Route path="People" element={<PeopleTable />} />
                     </Routes>
                 </div></div>

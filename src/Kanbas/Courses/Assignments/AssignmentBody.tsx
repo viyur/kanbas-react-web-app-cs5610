@@ -4,12 +4,17 @@ import { MdAssignment } from "react-icons/md";
 import SingleAssignmentButtons from "./SingleAssignmentButtons";
 import { MdArrowDropDown } from "react-icons/md";
 import { useParams, useLocation } from "react-router-dom";
-import { assignments } from "../../Database";
+import { useDispatch, useSelector } from "react-redux";
 
 
 
 export default function AssignmentBody() {
     const { cid } = useParams();
+    const { assignments } = useSelector((state: any) => state.assignmentsReducer);
+    const dispatch = useDispatch();
+    const { currentUser } = useSelector((state: any) => state.accountReducer);
+    const isFaculty = currentUser.role.toUpperCase() === "FACULTY";
+    let count = 0;
     return (
         <div>
             <ul className="list-group rounded-0">
@@ -23,8 +28,7 @@ export default function AssignmentBody() {
                     {assignments
                         .filter((assignment: any) => assignment.course === cid)
                         .map((assignment: any) => (
-
-                            < li className="wd-lesson list-group-item p-3 ps-1 d-flex justify-content-between align-items-center wd-assignment-list-item" >
+                            < li key={assignment._id} className="wd-lesson list-group-item p-3 ps-1 d-flex justify-content-between align-items-center wd-assignment-list-item" >
                                 {/* Buttons on the left */}
                                 < div className="d-flex align-items-center" >
                                     <BsGripVertical className="me-2 fs-4 text-muted" />
@@ -33,28 +37,30 @@ export default function AssignmentBody() {
                                 {/* Assignment Details */}
                                 <div className="flex-grow-1">
                                     {/* Assignment Title */}
-                                    <a
-                                        className="wd-assignment-link text-decoration-none text-black fw-bold fs-5"
-                                        href={`#/Kanbas/Courses/${cid}/Assignments/${assignment._id}`}
-                                    >
-                                        {`A${Number(assignment._id.slice(-2))} - ${assignment.title}`}
-                                    </a>
+                                    {isFaculty &&
+                                        <a
+                                            className="wd-assignment-link text-decoration-none text-black fw-bold fs-5"
+                                            href={`#/Kanbas/Courses/${cid}/Assignments/${assignment._id}`}
+                                        >
+                                            {`A${++count} - ${assignment.title}`}
+                                        </a>
+                                    }
+                                    {!isFaculty &&
+                                        <p className=" text-decoration-none text-black fw-bold fs-5">{`A${++count} - ${assignment.title}`} </p>
+                                    }
                                     {/* Assignment Details */}
                                     <div className="text-muted mt-1">
                                         <span className="text-danger">Multiple Modules</span> | <strong>Available until</strong> Nat 6 at 12:00am | <strong>Due</strong> May 13 at 11:59pm | 100pts
                                     </div>
                                 </div>
                                 {/* Buttons on the right */}
-                                < div className="ms-3" >
-                                    <SingleAssignmentButtons />
-                                </div>
+                                {isFaculty &&
+                                    < div className="ms-3" >
+                                        <SingleAssignmentButtons key={assignment._id} currentAssignment={assignment} />
+                                    </div>
+                                }
                             </li>
-
                         ))}
-
-
-
-
                 </ul>
             </ul >
         </div >
