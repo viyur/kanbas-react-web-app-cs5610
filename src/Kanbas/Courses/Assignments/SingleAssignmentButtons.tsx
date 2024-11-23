@@ -7,6 +7,7 @@ import { useDispatch } from "react-redux";
 import { deleteAssignment } from "./reducer";
 import { useState } from "react";
 import { Modal, Button } from "react-bootstrap";
+import * as assignmentsClient from "./client";
 
 export default function SingleAssignmentButtons({ currentAssignment }: any) {
     const { cid } = useParams();
@@ -15,7 +16,8 @@ export default function SingleAssignmentButtons({ currentAssignment }: any) {
     const [scale, setScale] = useState(1); // Default scale is 1 (normal size)
     const [showModal, setShowModal] = useState(false); // Modal visibility state
 
-    const handleDelete = () => {
+    const handleDelete = async () => {
+        await assignmentsClient.deleteAssignment(currentAssignment._id as string);
         dispatch(deleteAssignment(currentAssignment));
         setShowModal(false); // Close the modal after deletion
         navigate(`/kanbas/courses/${cid}/Assignments/`); //navigate back to assignments page

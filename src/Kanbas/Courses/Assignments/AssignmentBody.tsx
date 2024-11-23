@@ -5,6 +5,9 @@ import SingleAssignmentButtons from "./SingleAssignmentButtons";
 import { MdArrowDropDown } from "react-icons/md";
 import { useParams, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { setAssignments } from "./reducer";
+import { useEffect } from "react";
+import * as coursesClient from "../client";
 
 
 
@@ -14,6 +17,14 @@ export default function AssignmentBody() {
     const dispatch = useDispatch();
     const { currentUser } = useSelector((state: any) => state.accountReducer);
     const isFaculty = currentUser.role.toUpperCase() === "FACULTY";
+    const fetchAssignmentsForCourse = async () => {
+        const assignments = await coursesClient.findAssignmentsForCourse(cid as string);
+        dispatch(setAssignments(assignments));
+    };
+    useEffect(() => {
+        fetchAssignmentsForCourse();
+    }, []);
+
     let count = 0;
     return (
         <div>
@@ -26,7 +37,6 @@ export default function AssignmentBody() {
                 {/* different assignments */}
                 <ul className="list-group rounded-0 wd-assignment-list">
                     {assignments
-                        .filter((assignment: any) => assignment.course === cid)
                         .map((assignment: any) => (
                             < li key={assignment._id} className="wd-lesson list-group-item p-3 ps-1 d-flex justify-content-between align-items-center wd-assignment-list-item" >
                                 {/* Buttons on the left */}

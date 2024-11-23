@@ -6,6 +6,7 @@ import TOC from "./TOC";
 import { Routes, Route } from "react-router";
 import store from "./store";
 import { Provider } from "react-redux";
+import Lab5 from "./Lab5";
 export default function Labs() {
     return (
         // you don't need hashrouter here
@@ -22,6 +23,7 @@ export default function Labs() {
                     <Route path="Lab2" element={<Lab2 />}></Route>
                     <Route path="Lab3/*" element={<Lab3 />}></Route>
                     <Route path="Lab4/*" element={<Lab4 />}></Route>
+                    <Route path="Lab5/*" element={<Lab5 />}></Route>
                 </Routes>
             </div>
         </Provider>

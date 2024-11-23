@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { updateAssignment } from "./reducer";
 import { useDispatch, useSelector } from "react-redux";
+import * as assignmentClient from "./client";
 export default function AssignmentsEditor() {
     const { aid, cid } = useParams();
 
@@ -18,10 +19,10 @@ export default function AssignmentsEditor() {
         points: 100, ...currentAssignment
     });
 
-    const saveAssignment = (e: any) => {
+    const saveAssignment = async (e: any) => {
         e.preventDefault();
-        dispatch(updateAssignment(assignment));
-        console.log("updated", assignment);
+        const updatedAssignment = await assignmentClient.updateAssignment(assignment);
+        dispatch(updateAssignment(updatedAssignment));
         navigate(`/kanbas/courses/${cid}/Assignments/`);
     };
 

@@ -1,21 +1,50 @@
 import { Link } from "react-router-dom";
-import React, { useState } from "react";
-import * as db from "./Database";
+import React, { useEffect, useState } from "react";
+import * as courseClient from "./Courses/client";
+import * as userClient from "./Account/client";
 import { useDispatch, useSelector } from "react-redux";
-import { addEnrollment, deleteEnrollment } from "./Courses/enrollmentsReducer";
-
+import { setEnrollments, addEnrollment, deleteEnrollment } from "./Courses/enrollmentsReducer";
 
 
 export default function Dashboard({ courses, course, setCourse, addNewCourse,
-    deleteCourse, updateCourse }: {
+    deleteCourse, updateCourse, fetchCourses }: {
         courses: any[]; course: any; setCourse: (course: any) => void;
         addNewCourse: () => void; deleteCourse: (course: any) => void;
-        updateCourse: () => void;
+        updateCourse: () => void; fetchCourses: () => Promise<void>
     }) {
     const dispatch = useDispatch();
     const { currentUser } = useSelector((state: any) => state.accountReducer);
     const { enrollments } = useSelector((state: any) => state.enrollmentsReducer);
     const [showAllCourses, setShowAllCourses] = useState(false);
+    const fetchAllCourses = async () => {
+        try {
+            const allCourses = await courseClient.fetchAllCourses();
+            return allCourses;
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const fetchMyEnrollments = async () => {
+        try {
+            const myEnrollments = await userClient.findMyEnrollments();
+            console.log("myEnrollments", myEnrollments);
+            dispatch(setEnrollments(myEnrollments));
+        } catch (error) {
+            console.error(error);
+        }
+    }
+    const [all, setAll] = useState<any[]>([]);
+    useEffect(() => {
+        fetchAllCourses().then((data) => {
+            setAll(data);
+        });
+    }, []);
+    useEffect(() => {
+        fetchMyEnrollments();
+    }, []);
+
+
 
     const isFaculty = currentUser.role.toUpperCase() === "FACULTY";
     const isStudent = currentUser.role.toUpperCase() === "STUDENT";
@@ -25,23 +54,41 @@ export default function Dashboard({ courses, course, setCourse, addNewCourse,
         (enrollment: any) => enrollment.user === currentUser._id && enrollment.course === courseId
     );
 
-    // Toggle between enrolled courses and all courses
+    //Toggle between enrolled courses and all courses
     const toggleShowAllCourses = () => setShowAllCourses(!showAllCourses);
 
     // Handle enrolling to new course
-    const handleEnroll = (courseId: any) => {
-        dispatch(addEnrollment({ user: currentUser._id, course: courseId }));
+    const handleEnroll = async (courseId: any) => {
+        const enrollment = {
+            user: currentUser._id,
+            course: courseId
+        };
+        console.log("do you see the data", enrollment);
+        const newEnrollment = await userClient.addEnrollment(enrollment);
+        console.log("do you see the new Enrollment", newEnrollment);
+        dispatch(addEnrollment(newEnrollment));
+        await fetchCourses();
+
     };
     // Handle unenrolling from course
-    const handleUnenroll = (courseId: any) => {
-        dispatch(deleteEnrollment({ courseId, userId: currentUser._id }));
+    // const handleUnenroll = (courseId: any) => {
+    //     dispatch(deleteEnrollment({ courseId, userId: currentUser._id }));
+    // };
+
+    const handleUnenroll = async (courseId: string) => {
+        try {
+            await userClient.deleteEnrollment(currentUser._id, courseId); // Call API to delete enrollment
+            await fetchCourses();
+            dispatch(deleteEnrollment({ courseId, userId: currentUser._id })); // Update Redux state
+        } catch (error) {
+            console.error("Failed to unenroll:", error);
+        }
     };
+
 
     // Filter courses based on enrollment status for students
     // Faculty can see all courses
-    const visibleCourses = showAllCourses || isFaculty
-        ? courses
-        : courses.filter((course) => isEnrolled(course._id));
+    const visibleCourses = showAllCourses ? all : courses;
 
 
 
@@ -126,7 +173,7 @@ export default function Dashboard({ courses, course, setCourse, addNewCourse,
                                                         <button onClick={(e) => { e.preventDefault(); handleUnenroll(course._id) }}
                                                             className="btn btn-danger">Unenroll</button>
                                                     ) : (
-                                                        <button onClick={(e) => { e.preventDefault(); handleEnroll(course._id) }}
+                                                        <button onClick={async (e) => { e.preventDefault(); handleEnroll(course._id) }}
                                                             className="btn btn-success">Enroll</button>
                                                     )}
                                                 </div>
