@@ -46,8 +46,8 @@ export default function Dashboard({ courses, course, setCourse, addNewCourse,
 
 
 
-    const isFaculty = currentUser.role.toUpperCase() === "FACULTY";
-    const isStudent = currentUser.role.toUpperCase() === "STUDENT";
+    const isFaculty = currentUser.role?.toUpperCase() === "FACULTY";
+    const isStudent = currentUser.role?.toUpperCase() === "STUDENT";
 
     // check if user is enrolled in a course
     const isEnrolled = (courseId: any) => enrollments.some(
