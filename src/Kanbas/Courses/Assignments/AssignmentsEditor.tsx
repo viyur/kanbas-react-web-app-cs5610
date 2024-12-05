@@ -1,157 +1,226 @@
 // AssignmentEditor component aims to add a new assignment to a course
-// AssignmentsEditor component aims to edit old assignments  
+// AssignmentsEditor component aims to edit old assignments
 import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { updateAssignment } from "./reducer";
 import { useDispatch, useSelector } from "react-redux";
 import * as assignmentClient from "./client";
 export default function AssignmentsEditor() {
-    const { aid, cid } = useParams();
+  const { aid, cid } = useParams();
 
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
-    const { assignments } = useSelector((state: any) => state.assignmentsReducer);
-    const currentAssignment = assignments.find((a: any) => a._id === aid);
-    const [assignment, setAssignment] = useState<any>({
-        _id: aid, title: "New Assignment", course: cid,
-        description: "Update Assignment Description", dueDate: "2024-12-15",
-        availableFromDate: "2024-12-10", availableUntilDate: "2024-12-20",
-        points: 100, ...currentAssignment
-    });
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { assignments } = useSelector((state: any) => state.assignmentsReducer);
+  const currentAssignment = assignments.find((a: any) => a._id === aid);
+  const [assignment, setAssignment] = useState<any>({
+    _id: aid,
+    title: "New Assignment",
+    course: cid,
+    description: "Update Assignment Description",
+    dueDate: "2024-12-15",
+    availableFromDate: "2024-12-10",
+    availableUntilDate: "2024-12-20",
+    points: 100,
+    ...currentAssignment,
+  });
 
-    const saveAssignment = async (e: any) => {
-        e.preventDefault();
-        const updatedAssignment = await assignmentClient.updateAssignment(assignment);
-        dispatch(updateAssignment(updatedAssignment));
-        navigate(`/kanbas/courses/${cid}/Assignments/`);
-    };
+  // const saveAssignment = async (e: any) => {
+  //     e.preventDefault();
+  //     const updatedAssignment = await assignmentClient.updateAssignment(assignment);
+  //     dispatch(updateAssignment(updatedAssignment));
+  //     navigate(`/kanbas/courses/${cid}/Assignments/`);
+  // };
+  const saveAssignment = async (e: any) => {
+    e.preventDefault();
+    try {
+      // Perform the update operation
+      const result = await assignmentClient.updateAssignment(assignment);
+      // Check if the update was successful
+      if (result.matchedCount === 0) {
+        console.error("Assignment not found for update.");
+        return;
+      }
+      dispatch(updateAssignment(assignment));
+    } catch (error: any) {
+      console.error("Error updating assignment:", error);
+    } finally {
+      // Always navigate back to the assignments page
+      navigate(`/kanbas/courses/${cid}/Assignments/`);
+    }
+  };
 
+  return (
+    <div id="wd-assignments-editor" className="container py-4">
+      {/* Assignment Name */}
+      <div className="mb-4">
+        <label htmlFor="wd-name" className="form-label">
+          Assignment Name
+        </label>
+        <input
+          type="text"
+          id="wd-name"
+          className="form-control form-control-lg"
+          value={assignment.title}
+          placeholder="New Assignment"
+          onChange={(e) =>
+            setAssignment({ ...assignment, title: e.target.value })
+          }
+        />
+      </div>
 
-    return (
-        <div id="wd-assignments-editor" className="container py-4">
+      {/* Assignment Description */}
+      <div className="mb-4">
+        <label htmlFor="wd-description" className="form-label">
+          Assignment Description
+        </label>
+        <input
+          type="text"
+          id="wd-description"
+          className="form-control form-control-lg"
+          value={assignment.description}
+          placeholder="New Assignment Description"
+          onChange={(e) =>
+            setAssignment({ ...assignment, description: e.target.value })
+          }
+        />
+      </div>
 
-            {/* Assignment Name */}
-            <div className="mb-4">
-                <label htmlFor="wd-name" className="form-label">
-                    Assignment Name
-                </label>
-                <input
-                    type="text"
-                    id="wd-name"
-                    className="form-control form-control-lg"
-                    value={assignment.title}
-                    placeholder="New Assignment"
-                    onChange={(e) => setAssignment({ ...assignment, title: e.target.value })}
+      <form>
+        {/* Points */}
+        <div className="row mb-3">
+          <div className="col-md-3">
+            <label htmlFor="wd-points" className="col-form-label float-end ">
+              Points
+            </label>
+          </div>
+          <div className="col-md-9">
+            <input
+              type="number"
+              id="wd-points"
+              className="form-control form-control-lg"
+              value={assignment.points}
+              min={0}
+              onChange={(e) =>
+                setAssignment({
+                  ...assignment,
+                  points: parseInt(e.target.value),
+                })
+              }
+            />
+          </div>
+        </div>
 
-                />
+        {/* Assign to */}
+        <div className="row mb-3">
+          <div className="col-md-3">
+            <label htmlFor="wd-assign" className="col-form-label float-end ">
+              Assign
+            </label>
+          </div>
+          <div
+            id="wd-assign"
+            className="col-md-9 border border-light-subtle rounded"
+          >
+            <div className="mt-3 mb-3">
+              <label
+                htmlFor="wd-due-date"
+                className="form-label fs-6 fw-bolder"
+              >
+                Due
+              </label>
+
+              <input
+                type="date"
+                className="form-control"
+                id="wd-due-date"
+                value={new Date(assignment.dueDate).toISOString().split("T")[0]}
+                onChange={(e) =>
+                  setAssignment({ ...assignment, dueDate: e.target.value })
+                }
+              />
             </div>
 
-            {/* Assignment Description */}
-            <div className="mb-4">
-                <label htmlFor="wd-description" className="form-label">
-                    Assignment Description
-                </label>
-                <input
-                    type="text"
-                    id="wd-description"
-                    className="form-control form-control-lg"
-                    value={assignment.description}
-                    placeholder="New Assignment Description"
-                    onChange={(e) => setAssignment({ ...assignment, description: e.target.value })}
+            <div className="row">
+              <div className="col-6">
+                <div className="mb-3">
+                  <label
+                    htmlFor="wd-available-from"
+                    className="form-label fs-6 fw-bolder"
+                  >
+                    Available From
+                  </label>
+                  <input
+                    type="date"
+                    className="form-control"
+                    id="wd-available-from"
+                    value={
+                      new Date(assignment.availableFromDate)
+                        .toISOString()
+                        .split("T")[0]
+                    }
+                    onChange={(e) =>
+                      setAssignment({
+                        ...assignment,
+                        availableFromDate: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+              </div>
 
-                />
+              <div className="col-6">
+                <div className="mb-3">
+                  <label
+                    htmlFor="wd-available-until"
+                    className="form-label fs-6 fw-bolder"
+                  >
+                    Until
+                  </label>
+                  <input
+                    type="date"
+                    className="form-control"
+                    id="wd-available-until"
+                    value={
+                      new Date(assignment.availableUntilDate)
+                        .toISOString()
+                        .split("T")[0]
+                    }
+                    onChange={(e) =>
+                      setAssignment({
+                        ...assignment,
+                        availableUntilDate: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+              </div>
             </div>
+          </div>
+        </div>
 
-            <form >
-                {/* Points */}
-                <div className="row mb-3">
-                    <div className="col-md-3">
-                        <label htmlFor="wd-points" className="col-form-label float-end ">
-                            Points
-                        </label>
-                    </div>
-                    <div className="col-md-9">
-                        <input
-                            type="number"
-                            id="wd-points"
-                            className="form-control form-control-lg"
-                            value={assignment.points}
-                            min={0}
-                            onChange={(e) => setAssignment({ ...assignment, points: parseInt(e.target.value) })}
-                        />
-                    </div>
-                </div>
-
-                {/* Assign to */}
-                <div className="row mb-3">
-                    <div className="col-md-3">
-                        <label htmlFor="wd-assign" className="col-form-label float-end ">
-                            Assign
-                        </label>
-                    </div>
-                    <div id="wd-assign" className="col-md-9 border border-light-subtle rounded">
-
-                        <div className="mt-3 mb-3">
-                            <label htmlFor="wd-due-date"
-                                className="form-label fs-6 fw-bolder">
-                                Due</label>
-
-
-                            <input type="date" className="form-control"
-                                id="wd-due-date" value={assignment.dueDate} onChange={
-                                    (e) => setAssignment({ ...assignment, dueDate: e.target.value })
-                                } />
-
-                        </div>
-
-                        <div className="row">
-                            <div className="col-6">
-
-                                <div className="mb-3">
-                                    <label htmlFor="wd-available-from"
-                                        className="form-label fs-6 fw-bolder">
-                                        Available From</label>
-                                    <input type="date" className="form-control"
-                                        id="wd-available-from" value={assignment.availableFromDate} onChange={(e) => setAssignment({ ...assignment, availableFromDate: e.target.value })} />
-                                </div>
-                            </div>
-
-                            <div className="col-6">
-                                <div className="mb-3">
-                                    <label htmlFor="wd-available-until"
-                                        className="form-label fs-6 fw-bolder">
-                                        Until</label>
-                                    <input type="date" className="form-control"
-                                        id="wd-available-until" value={assignment.availableUntilDate} onChange={(e) => setAssignment({ ...assignment, availableUntilDate: e.target.value })} />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <hr style={{ width: "100%", margin: "0" }} className="mt-3" />
-                <div className="mt-3 float-end">
-                    <button
-                        type="button"
-                        className="btn btn-lg btn-secondary me-1"
-                        onClick={() => navigate(`/kanbas/courses/${cid}/Assignments/`)}
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        type="button"
-                        className="btn btn-lg btn-danger me-1"
-                        onClick={saveAssignment}
-                    >
-                        Save
-                    </button>
-                </div>
-            </form >
-        </div >
-    );
+        <hr style={{ width: "100%", margin: "0" }} className="mt-3" />
+        <div className="mt-3 float-end">
+          <button
+            type="button"
+            className="btn btn-lg btn-secondary me-1"
+            onClick={() => navigate(`/kanbas/courses/${cid}/Assignments/`)}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="btn btn-lg btn-danger me-1"
+            onClick={async (e) => {
+              await saveAssignment(e);
+            }}
+          >
+            Save
+          </button>
+        </div>
+      </form>
+    </div>
+  );
 }
-
-
 
 // old version
 // import { SlCalender } from "react-icons/sl";
@@ -177,7 +246,6 @@ export default function AssignmentsEditor() {
 //                 />
 //             </div>
 
-
 //             <div className="mb-4">
 //                 <div className="card border border-light-subtle rounded">
 //                     <div className="card-body">
@@ -201,10 +269,6 @@ export default function AssignmentsEditor() {
 //                     </div>
 //                 </div>
 //             </div>
-
-
-
-
 
 //             <form >
 //                 {/* Points */}
@@ -326,7 +390,6 @@ export default function AssignmentsEditor() {
 //                                 className="form-label fs-6 fw-bolder">
 //                                 Due</label>
 
-
 //                             <input type="date" className="form-control"
 //                                 id="wd-due-date" value={"2024-05-13"} />
 
@@ -365,8 +428,6 @@ export default function AssignmentsEditor() {
 //             </form>
 
 //         </div>
-
-
 
 //     );
 // }
