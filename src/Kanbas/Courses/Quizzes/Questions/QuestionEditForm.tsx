@@ -36,18 +36,57 @@ export default function QuestionEditForm() {
     }
   };
 
+  // function to examine question type
+  const checkQuestionType = (q: any) => {
+    let newQuestion = { ...q };
+    switch (q.questionType) {
+      case "Multiple Choice":
+        newQuestion.blankAnswers = [];
+        newQuestion.trueFalseAnswer = false;
+        break;
+      case "True/False":
+        newQuestion.choices = [];
+        newQuestion.blankAnswers = [];
+        break;
+      case "Fill in the blank":
+        newQuestion.choices = [];
+        newQuestion.trueFalseAnswer = false;
+        break;
+      default:
+        console.warn("Unknown question type:", q.questionType);
+        break;
+    }
+    return newQuestion;
+  };
   // Add a new question to the quiz with axios
   const createNewQuestion = async () => {
     try {
+      const newQuestion = checkQuestionType(q);
       const question = await QuizClient.createQuestionForQuiz(
         quizId as string,
-        q
+        newQuestion
       );
-      navigate(
-        `/Kanbas/Courses/${cid}/Quizzes/${quizId}/questionedit/${question._id}`
-      );
+      // setQ(question);
+      // Navigate to the questions list page
+      navigate(`/Kanbas/Courses/${cid}/Quizzes/${quizId}/Edit/questions`);
     } catch (error: any) {
       console.error("Error creating question:", error);
+    }
+  };
+
+  // Update an existing question with axios
+  const updateQuestion = async () => {
+    try {
+      const newQuestion = checkQuestionType(q);
+      const question = await QuestionClient.updateQuestion(
+        questionId as string,
+        newQuestion
+      );
+      setQ(question);
+      // Navigate to the questions list page
+      navigate(`/Kanbas/Courses/${cid}/Quizzes/${quizId}/Edit/questions`);
+    } catch (error: any) {
+      console.error("Error updating question:", error);
     }
   };
 
@@ -123,8 +162,8 @@ export default function QuestionEditForm() {
       {q.questionType === "Multiple Choice" && (
         <MultipleChoice q={q} setQ={setQ} />
       )}
-      {q.questionType === "True/False" && <TrueFalse q={q} setQ={setQ} />}
-      {q.questionType === "Fill in the Blank" && (
+      {q.questionType === "True/false" && <TrueFalse q={q} setQ={setQ} />}
+      {q.questionType === "Fill in the blank" && (
         <FillBlank q={q} setQ={setQ} />
       )}
       <br />
@@ -147,6 +186,12 @@ export default function QuestionEditForm() {
         </div>
       )}
       {/* button for update old question */}
+      {questionId && (
+        <div>
+          <button onClick={updateQuestion}>Update</button>
+        </div>
+      )}
+      {/* end */}
     </div>
   );
 }

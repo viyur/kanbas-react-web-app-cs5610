@@ -10,3 +10,20 @@ export async function findQuestionById(questionId: string) {
   );
   return data;
 }
+
+// update question by question ID
+export async function updateQuestion(questionId: string, question: any) {
+  const { data } = await axiosWithCredentials.put(
+    `${QUESTIONS_API}/${questionId}`,
+    question
+  );
+  return data;
+}
+
+// delete question by question ID
+export async function deleteQuestion(questionId: string) {
+  const { data } = await axiosWithCredentials.delete(
+    `${QUESTIONS_API}/${questionId}`
+  );
+  return data;
+}

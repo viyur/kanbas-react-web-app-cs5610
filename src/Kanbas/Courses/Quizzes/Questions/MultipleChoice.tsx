@@ -8,6 +8,7 @@ export default function MultipleChoice({ q, setQ }: { q: any; setQ: any }) {
   const [newChoiceText, setNewChoiceText] = useState("");
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
+  // Handle adding a new choice
   const handleAddChoice = () => {
     if (newChoiceText.trim() === "") return;
     const newChoice = { text: newChoiceText, isCorrect: false };
@@ -22,10 +23,12 @@ export default function MultipleChoice({ q, setQ }: { q: any; setQ: any }) {
     setShowAddInputRow(false);
   };
 
+  // Handle cancelling adding a new choice
   const handleCancelAddChoice = () => {
     setNewChoiceText("");
     setShowAddInputRow(false);
   };
+
   // Handle normal input changes
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
