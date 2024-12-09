@@ -74,3 +74,17 @@ export const createAssignmentForCourse = async (
   );
   return response.data;
 };
+
+// Create a new quiz for a specific course
+export const createQuiz = async (courseId: string, quiz: any) => {
+  const QUIZZES_API = `${COURSES_API}/${courseId}/quizzes`;
+  const { data } = await axiosWithCredentials.post(QUIZZES_API, quiz);
+  return data;
+};
+
+// Retrieve all quizzes for a specific course
+export const getQuizzesByCourse = async (courseId: string) => {
+  const QUIZZES_API = `${COURSES_API}/${courseId}/quizzes`;
+  const { data } = await axiosWithCredentials.get(QUIZZES_API);
+  return data;
+};

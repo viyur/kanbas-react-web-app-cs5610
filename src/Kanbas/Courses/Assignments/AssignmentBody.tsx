@@ -60,7 +60,7 @@ export default function AssignmentBody() {
                 <BsGripVertical className="me-2 fs-4 text-muted" />
                 <MdAssignment className="me-3 fs-4 text-success" />
               </div>
-              {/* Assignment Details */}
+              {/* Assignment Title and Details */}
               <div className="flex-grow-1">
                 {/* Assignment Title */}
                 {isFaculty && (
