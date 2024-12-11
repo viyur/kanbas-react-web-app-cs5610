@@ -1,26 +1,27 @@
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
 import * as QuizClient from "./client";
 import { useEffect, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { setTempQuiz, clearTempQuiz } from "./tempQuizReducer";
 import { Form, Button, Container, Row, Col, Card } from "react-bootstrap";
 import ReactQuill from "react-quill";
 
 // `/Kanbas/Courses/${cid}/Quizzes/${quizId}/Edit` => QuizEditForm Screen
-export default function QuizEditForm({
-  quiz,
-  setQuiz,
-}: {
-  quiz: any;
-  setQuiz: any;
-}) {
+export default function QuizEditForm() {
   const { cid, quizId } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  // redux  tempQuiz
+  const tempQuiz = useSelector((state: any) => state.tempQuizReducer);
 
   // function to update the quiz
   const updateQuiz = async () => {
     try {
-      const updatedQuiz = await QuizClient.updateQuiz(quizId as string, quiz);
-      setQuiz(updatedQuiz);
+      const updatedQuiz = await QuizClient.updateQuiz(
+        quizId as string,
+        tempQuiz
+      );
+      dispatch(setTempQuiz(updatedQuiz));
     } catch (error: any) {
       console.error("Error updating quiz:", error);
     } finally {
@@ -31,13 +32,14 @@ export default function QuizEditForm({
   const updateAndPublish = async () => {
     try {
       // Create a new object with `published: true` explicitly set
-      const publishedQuizData = { ...quiz, published: true };
+      const publishedQuizData = { ...tempQuiz, published: true };
 
       const updatedQuiz = await QuizClient.updateQuiz(
         quizId as string,
         publishedQuizData
       );
-      setQuiz(updatedQuiz);
+
+      dispatch(setTempQuiz(updatedQuiz));
       console.log("updatedQuiz", updatedQuiz);
     } catch (error: any) {
       console.error("Error updating quiz:", error);
@@ -49,34 +51,25 @@ export default function QuizEditForm({
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setQuiz((prevQuiz: any) => ({
-      ...prevQuiz,
-      [name]: value,
-    }));
+
+    dispatch(setTempQuiz({ ...tempQuiz, [name]: value }));
   };
 
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setQuiz((prevQuiz: any) => ({
-      ...prevQuiz,
-      [name]: value,
-    }));
+
+    dispatch(setTempQuiz({ ...tempQuiz, [name]: value }));
   };
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
-    setQuiz((prevQuiz: any) => ({
-      ...prevQuiz,
-      [name]: checked,
-    }));
+
+    dispatch(setTempQuiz({ ...tempQuiz, [name]: checked }));
   };
 
   // React Quill Editor onChange
   const handleDescriptionChange = (content: string) => {
-    setQuiz((prev: any) => ({
-      ...prev,
-      description: content,
-    }));
+    dispatch(setTempQuiz({ ...tempQuiz, description: content }));
   };
 
   return (
@@ -90,7 +83,7 @@ export default function QuizEditForm({
               <Form.Control
                 type="text"
                 name="title"
-                value={quiz.title}
+                value={tempQuiz.title}
                 onChange={handleInputChange}
               />
             </Form.Group>
@@ -113,7 +106,7 @@ export default function QuizEditForm({
               <Form.Label>Description</Form.Label>
               {/* 替换为 React Quill */}
               <ReactQuill
-                value={quiz.description}
+                value={tempQuiz.description}
                 onChange={handleDescriptionChange}
                 placeholder="Enter quiz description here..."
                 theme="snow"
@@ -129,7 +122,7 @@ export default function QuizEditForm({
               <Form.Label>Quiz Type</Form.Label>
               <Form.Select
                 name="quizType"
-                value={quiz.quizType}
+                value={tempQuiz.quizType}
                 onChange={handleSelectChange}
               >
                 <option value="Graded Quiz">Graded Quiz</option>
@@ -144,7 +137,7 @@ export default function QuizEditForm({
               <Form.Label>Assignment Group</Form.Label>
               <Form.Select
                 name="assignmentGroup"
-                value={quiz.assignmentGroup}
+                value={tempQuiz.assignmentGroup}
                 onChange={handleSelectChange}
               >
                 <option value="Quizzes">Quizzes</option>
@@ -164,7 +157,7 @@ export default function QuizEditForm({
                 type="checkbox"
                 label="Shuffle Answers"
                 name="shuffleAnswers"
-                checked={quiz.shuffleAnswers}
+                checked={tempQuiz.shuffleAnswers}
                 onChange={handleCheckboxChange}
               />
             </Form.Group>
@@ -175,7 +168,7 @@ export default function QuizEditForm({
                 type="checkbox"
                 label="One Question at a Time"
                 name="oneQuestionAtATime"
-                checked={quiz.oneQuestionAtATime}
+                checked={tempQuiz.oneQuestionAtATime}
                 onChange={handleCheckboxChange}
               />
             </Form.Group>
@@ -189,7 +182,7 @@ export default function QuizEditForm({
                 type="checkbox"
                 label="Webcam Required"
                 name="webcamRequired"
-                checked={quiz.webcamRequired}
+                checked={tempQuiz.webcamRequired}
                 onChange={handleCheckboxChange}
               />
             </Form.Group>
@@ -200,7 +193,7 @@ export default function QuizEditForm({
                 type="checkbox"
                 label="Lock Questions After Answering"
                 name="lockQuestionsAfterAnswering"
-                checked={quiz.lockQuestionsAfterAnswering}
+                checked={tempQuiz.lockQuestionsAfterAnswering}
                 onChange={handleCheckboxChange}
               />
             </Form.Group>
@@ -215,13 +208,13 @@ export default function QuizEditForm({
                 type="checkbox"
                 label="Multiple Attempts"
                 name="multipleAttempts"
-                checked={quiz.multipleAttempts}
+                checked={tempQuiz.multipleAttempts}
                 onChange={handleCheckboxChange}
               />
             </Form.Group>
           </Col>
           <Row className="mb-3">
-            {quiz.multipleAttempts && (
+            {tempQuiz.multipleAttempts && (
               <Col md={6}>
                 <Form.Group controlId="howManyAttempts">
                   <Form.Label className="text-muted">
@@ -230,7 +223,7 @@ export default function QuizEditForm({
                   <Form.Control
                     type="number"
                     name="howManyAttempts"
-                    value={quiz.howManyAttempts}
+                    value={tempQuiz.howManyAttempts}
                     min={2}
                     onChange={handleInputChange}
                   />{" "}
@@ -248,7 +241,7 @@ export default function QuizEditForm({
               <Form.Control
                 type="number"
                 name="timeLimit"
-                value={quiz.timeLimit}
+                value={tempQuiz.timeLimit}
                 min={1}
                 onChange={handleInputChange}
               />{" "}
@@ -264,7 +257,7 @@ export default function QuizEditForm({
               <Form.Control
                 type="text"
                 name="showCorrectAnswers"
-                value={quiz.showCorrectAnswers}
+                value={tempQuiz.showCorrectAnswers}
                 onChange={handleInputChange}
               />
             </Form.Group>
@@ -279,7 +272,7 @@ export default function QuizEditForm({
               <Form.Control
                 type="text"
                 name="assignedTo"
-                value={quiz.assignedTo}
+                value={tempQuiz.assignedTo}
                 onChange={handleInputChange}
               />
             </Form.Group>
@@ -294,7 +287,7 @@ export default function QuizEditForm({
               <Form.Control
                 type="text"
                 name="accessCode"
-                value={quiz.accessCode}
+                value={tempQuiz.accessCode}
                 onChange={handleInputChange}
               />
             </Form.Group>
@@ -313,8 +306,8 @@ export default function QuizEditForm({
                     type="date"
                     name="dueDate"
                     value={
-                      quiz.dueDate
-                        ? new Date(quiz.dueDate).toISOString().split("T")[0]
+                      tempQuiz.dueDate
+                        ? new Date(tempQuiz.dueDate).toISOString().split("T")[0]
                         : ""
                     }
                     onChange={handleInputChange}
@@ -330,8 +323,10 @@ export default function QuizEditForm({
                     type="date"
                     name="availableDate"
                     value={
-                      quiz.availableDate &&
-                      new Date(quiz.availableDate).toISOString().split("T")[0]
+                      tempQuiz.availableDate &&
+                      new Date(tempQuiz.availableDate)
+                        .toISOString()
+                        .split("T")[0]
                     }
                     onChange={handleInputChange}
                   />
@@ -344,8 +339,8 @@ export default function QuizEditForm({
                     type="date"
                     name="untilDate"
                     value={
-                      quiz.untilDate &&
-                      new Date(quiz.untilDate).toISOString().split("T")[0]
+                      tempQuiz.untilDate &&
+                      new Date(tempQuiz.untilDate).toISOString().split("T")[0]
                     }
                     onChange={handleInputChange}
                   />

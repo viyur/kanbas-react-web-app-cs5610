@@ -9,15 +9,16 @@ import * as QuizClient from "../client";
 import * as QuestionClient from "../Questions/client";
 import FillBlankAnswer from "./FillBlankAnswer";
 
-export default function QuizPreview() {
+export default function StudentQuiz() {
   const { cid, quizId } = useParams();
   const navigate = useNavigate();
   const { currentUser } = useSelector((state: any) => state.accountReducer);
-  const [questions, setQuestions] = useState<any[]>([]);
-  const [responses, setResponses] = useState<any[]>([]);
-  const [lastAttempt, setLastAttempt] = useState<any>({});
-  const [quiz, setQuiz] = useState<any>({});
+  const [questions, setQuestions] = useState<any[]>([]); // questions for single quiz
+  const [responses, setResponses] = useState<any[]>([]); // responses for all questions in single quiz
+  const [lastAttempt, setLastAttempt] = useState<any>({}); // lastest attempt for this quiz
+  const [quiz, setQuiz] = useState<any>({}); // single quiz
   const [startTime, setStartTime] = useState<Date | null>(null);
+  const [attempts, setAttempts] = useState<any[]>([]); // All history attempts by the user
 
   // Format date-time to a readable string
   const formatDateTime = (isoString: string) => {
@@ -93,6 +94,24 @@ export default function QuizPreview() {
     }
   };
 
+  // function to Fetch all attempts for the quiz with axios
+  const fetchQuizAttempts = async () => {
+    if (!quizId || !currentUser?._id) {
+      console.error("Quiz ID or user ID is missing.");
+      return;
+    }
+    try {
+      const { attempts } = await QuizClient.findAllQuizAttempts(
+        quizId as string,
+        currentUser._id as string
+      );
+      setAttempts(attempts);
+    } catch (error: any) {
+      console.error("Error fetching quiz attempts:", error);
+      setAttempts([]); // Clear attempts on error
+    }
+  };
+
   // submit attempt with axios
   const submitAttempt = async () => {
     if (!quizId || !currentUser) {
@@ -114,6 +133,7 @@ export default function QuizPreview() {
       fetchQuiz();
       fetchQuestions();
       fetchLastAttempt();
+      fetchQuizAttempts();
     } catch (error: any) {
       console.error("Error submitting attempt:", error);
     }
@@ -125,6 +145,7 @@ export default function QuizPreview() {
     fetchQuiz();
     fetchQuestions();
     fetchLastAttempt();
+    fetchQuizAttempts();
   }, [quizId]);
 
   // show the message if no questions are found
@@ -137,9 +158,9 @@ export default function QuizPreview() {
         </div>
         <button
           className="btn btn-primary"
-          onClick={() => navigate(`/Kanbas/Courses/${cid}/Quizzes/${quizId}`)}
+          onClick={() => navigate(`/Kanbas/Courses/${cid}/Quizzes`)}
         >
-          Go back to quiz
+          Go back to quizzes
         </button>{" "}
       </div>
     );
@@ -157,21 +178,16 @@ export default function QuizPreview() {
           >
             Back to Quiz Details
           </button>{" "}
-          <button
-            onClick={() =>
-              navigate(
-                `/Kanbas/Courses/${cid}/Quizzes/${quizId}/Edit/questions`
-              )
-            }
-            className="btn btn-primary ms-2"
-          >
-            Keep Edit Quiz
-          </button>
         </div>
-        <div className="alert alert-danger fs-6" role="alert">
-          <AiOutlineExclamationCircle className="me-1 fs-5" /> This is a preview
-          of the quiz.
-        </div>
+
+        {/* Alert to user if  reached the maximum number of attempts */}
+        {attempts && attempts.length >= quiz.howManyAttempts && (
+          <div className="alert alert-danger fs-6" role="alert">
+            <AiOutlineExclamationCircle className="me-1 fs-5" /> You have
+            reached the maximum number of attempts.
+          </div>
+        )}
+
         {/* Time Information */}
         <div className="mb-4">
           <p className="fw-light text-muted">
@@ -180,20 +196,35 @@ export default function QuizPreview() {
           </p>
         </div>
       </div>
-      {/* container to show last attempt time and score */}
 
-      {lastAttempt?._id && (
-        <div className="container mb-2">
-          <hr />
-          <h5 className="text-muted">Attempt History</h5>
-
-          <p className="fw-light text-muted">
-            <strong>Last Attempt Submitted At:</strong>{" "}
-            {formatDateTime(lastAttempt.attemptedAt)} <br />
-            <strong>Last Attempt Score:</strong> {lastAttempt.score} points
-          </p>
+      {/* container to show attempt history */}
+      <div className="container">
+        <div className="row bg-secondary text-white fw-bold py-2">
+          <div className="col-4">Attempt History</div>
+          <div className="col-4">Submitted At</div>
+          <div className="col-4">Final Score</div>
         </div>
-      )}
+        {attempts.length > 0 ? (
+          attempts.map((attempt, index) => (
+            <div
+              className="row py-2 border-bottom text-muted"
+              key={attempt._id}
+            >
+              <div className="col-4">Attempt {index + 1}</div>
+              <div className="col-4">
+                {attempt.attemptedAt && formatDateTime(attempt.attemptedAt)}
+              </div>
+              <div className="col-4">
+                {attempt.score} / {quiz.points} pts
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="row py-2">
+            <div className="col-12 text-center">No attempts found</div>
+          </div>
+        )}
+      </div>
 
       {/* Questions container */}
       <div className="container">
@@ -236,11 +267,14 @@ export default function QuizPreview() {
       </div>
       {/* buttons */}
       <hr />
-      <div className="container d-flex justify-content-end mt-4">
-        <button onClick={submitAttempt} className="btn btn-outline-danger">
-          Submit
-        </button>
-      </div>
+      {/* only show submit button if user has not reached the maximum number of attempts */}
+      {attempts && attempts.length < quiz.howManyAttempts && (
+        <div className="container d-flex justify-content-end mt-4">
+          <button onClick={submitAttempt} className="btn btn-outline-danger">
+            Submit
+          </button>
+        </div>
+      )}
       {/* end */}
     </div>
   );

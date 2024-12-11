@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { LuDot } from "react-icons/lu";
 
-export default function FillBlankAnswer({
+export default function TrueFalseAnswer({
   q,
   i,
   responses,
@@ -21,20 +21,12 @@ export default function FillBlankAnswer({
     isCorrect: false,
   });
 
-  // Handle input field changes
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const userAnswer = e.target.value;
-
-    // Check if the user's answer matches any correct answer (case-insensitive)
-    const isCorrect = q.correctAnswer.some(
-      (correctAns: string) =>
-        correctAns.trim().toLowerCase() === userAnswer.trim().toLowerCase()
-    );
-
+  // Function to handle selection of True or False
+  const handleChoiceChange = (choice: boolean) => {
     const newResponse = {
       question: q._id,
-      answer: userAnswer,
-      isCorrect: isCorrect,
+      answer: choice,
+      isCorrect: q.correctAnswer === choice,
     };
 
     // Update the local response state
@@ -42,9 +34,11 @@ export default function FillBlankAnswer({
 
     // Update the centralized responses array
     setResponses((prevResponses) => {
+      // Remove any existing response for this question
       const updatedResponses = prevResponses.filter(
         (res) => res.question !== q._id
       );
+      // Add the new response
       return [...updatedResponses, newResponse];
     });
   };
@@ -61,29 +55,36 @@ export default function FillBlankAnswer({
       </div>
       <div className="card-body">
         <p dangerouslySetInnerHTML={{ __html: q.question }}></p>
-        <div className="form-group">
-          <label htmlFor={`fill-blank-${q._id}`} className="form-label">
-            Your Answer:
+
+        {/* Render True/False options as radio buttons */}
+        <div className="form-check">
+          <label className="form-check-label d-flex align-items-center">
+            <input
+              type="radio"
+              name={`question-${i}`} // Ensure unique group name per question
+              value="true"
+              className="form-check-input me-2"
+              checked={response.answer === true} // Check if selected
+              onChange={() => handleChoiceChange(true)} // Handle change
+            />
+            True
           </label>
-          <input
-            type="text"
-            id={`fill-blank-${q._id}`}
-            className="form-control"
-            value={response.answer} // Controlled input
-            onChange={handleInputChange} // Update state on input change
-            placeholder="Type your answer here..."
-          />
         </div>
-        {/* tell user if they are correct or incorrect */}
-        {/* {response.answer && (
-          <p
-            className={`mt-2 ${
-              response.isCorrect ? "text-success" : "text-danger"
-            }`}
-          >
-            {response.isCorrect ? "Correct!" : "Incorrect."}
-          </p>
-        )} */}
+
+        {/* Display true false radio buttons */}
+        <div className="form-check">
+          <label className="form-check-label d-flex align-items-center">
+            <input
+              type="radio"
+              name={`question-${i}`} // Ensure unique group name per question
+              value="false"
+              className="form-check-input me-2"
+              checked={response.answer === false} // Check if selected
+              onChange={() => handleChoiceChange(false)} // Handle change
+            />
+            False
+          </label>
+        </div>
 
         {/* Display last response */}
         {lastResponse && (
@@ -93,7 +94,7 @@ export default function FillBlankAnswer({
 
             <p className="ms-3 text-muted">
               <LuDot className="fs-5" />{" "}
-              {!lastResponse.answer ? "N/A" : lastResponse.answer}
+              {lastResponse.answer === true ? "True" : "False"}
               {"  "}
               {lastResponse.isCorrect && (
                 <span className="ms-2 badge rounded-pill bg-success">
@@ -108,7 +109,6 @@ export default function FillBlankAnswer({
             </p>
           </div>
         )}
-
         {/* end of card body */}
       </div>
     </div>

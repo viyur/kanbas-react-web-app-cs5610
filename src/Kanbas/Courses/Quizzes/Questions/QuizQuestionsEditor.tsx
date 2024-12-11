@@ -4,16 +4,17 @@ import * as QuestionClient from "./client";
 import { useState, useEffect } from "react";
 import { AiOutlineEdit } from "react-icons/ai";
 import { AiOutlineDelete } from "react-icons/ai";
-import { all } from "axios";
+import { useSelector, useDispatch } from "react-redux";
+import { setTempQuiz, clearTempQuiz } from "../tempQuizReducer";
 
 // `/Kanbas/Courses/${cid}/Quizzes/${quizId}/Edit/questions` => QuizQuestions Screen
-
 export default function QuizQuestionsEditor() {
   const { cid, quizId } = useParams();
   const [questions, setQuestions] = useState<any[]>([]);
   const [totalPoints, setTotalPoints] = useState(0);
-  const [quiz, setQuiz] = useState<any>({});
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const tempQuiz = useSelector((state: any) => state.tempQuizReducer);
 
   // Fetch all questions for the quiz with axios
   const fetchQuestions = async () => {
@@ -47,34 +48,16 @@ export default function QuizQuestionsEditor() {
     }
   };
 
-  // Function to fetch quiz
-  const fetchQuiz = async () => {
-    if (!quizId) {
-      console.error("Quiz ID is not available when fetching quiz.");
-      return;
-    }
-    try {
-      const quiz = await QuizClient.findQuizById(quizId as string);
-      setQuiz(quiz);
-    } catch (error: any) {
-      setQuiz({});
-      console.error(
-        "Error fetching quiz:",
-        error.response?.data || error.message
-      );
-    }
-  };
-
   // function to update the quiz if total score changes
   const updateQuiz = async () => {
     try {
       // Update the quiz with the new total score
-      const quizWithNewTotal = { ...quiz, points: totalPoints };
+      const quizWithNewTotal = { ...tempQuiz, points: totalPoints };
       const updatedQuiz = await QuizClient.updateQuiz(
         quizId as string,
         quizWithNewTotal
       );
-      // setQuiz(updatedQuiz);
+      dispatch(setTempQuiz(updatedQuiz));
     } catch (error: any) {
       console.error("Error updating quiz:", error);
     } finally {
@@ -84,7 +67,6 @@ export default function QuizQuestionsEditor() {
 
   // call the fetchQuestions function
   useEffect(() => {
-    fetchQuiz();
     fetchQuestions();
   }, [quizId]);
 

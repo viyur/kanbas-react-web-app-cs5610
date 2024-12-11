@@ -4,6 +4,7 @@ import QuizDetails from "./QuizDetails";
 import QuizDetailsEdit from "./QuizDetailsEdit";
 import QuestionEditForm from "./Questions/QuestionEditForm";
 import QuizPreview from "./QuizPreview";
+import StudentQuiz from "./StudentQuiz";
 
 export default function Quizzes() {
   const { cid } = useParams();
@@ -26,6 +27,9 @@ export default function Quizzes() {
             path=":quizId/questionedit/:questionId"
             element={<QuestionEditForm />}
           />
+
+          {/* for student taking quiz */}
+          <Route path=":quizId/studentquiz" element={<StudentQuiz />} />
         </Routes>
       </div>
     </div>

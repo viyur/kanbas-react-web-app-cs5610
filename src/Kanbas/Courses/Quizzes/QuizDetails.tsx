@@ -117,7 +117,17 @@ export default function QuizDetails() {
         <div className="container mt-3">
           <div className="row justify-content-center">
             <div className="col-4 ">
-              <button className=" btn btn-danger"> Start </button>
+              <button
+                onClick={() => {
+                  navigate(
+                    `/Kanbas/Courses/${cid}/Quizzes/${quizId}/studentquiz`
+                  );
+                }}
+                className=" btn btn-danger"
+              >
+                {" "}
+                Start{" "}
+              </button>
             </div>
           </div>
         </div>
