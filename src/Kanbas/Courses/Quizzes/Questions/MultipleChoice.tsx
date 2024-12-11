@@ -72,6 +72,10 @@ export default function MultipleChoice({ q, setQ }: { q: any; setQ: any }) {
   };
 
   useEffect(() => {
+    if (!q.choices) {
+      setChoices([]);
+      return;
+    }
     setChoices(q.choices);
   }, [q]);
 
@@ -79,6 +83,10 @@ export default function MultipleChoice({ q, setQ }: { q: any; setQ: any }) {
     <div>
       {/* WYSIWYG Editor for the Question Field */}
       <div className="mt-4 container">
+        <div className="mt-3 mb-2 text-secondary fs-6">
+          Enter your question text and multiple choice answers. then select one
+          correct answer.
+        </div>
         {/* row to show Question label */}
         <div className="row">
           <div className="col-md-3">
@@ -176,7 +184,7 @@ export default function MultipleChoice({ q, setQ }: { q: any; setQ: any }) {
         {/* Input Row */}
         {showAddInputRow && (
           <div className="row mt-3 align-items-center border border-light-subtle rounded p-3">
-            <div className="col-3 text-end">
+            <div className="col-2 text-end">
               <label className="form-label ">Possible Answer</label>
             </div>
             <div className="col-7">
@@ -188,7 +196,7 @@ export default function MultipleChoice({ q, setQ }: { q: any; setQ: any }) {
                 placeholder="Enter a new possible answer"
               />
             </div>
-            <div className="col-2 d-flex">
+            <div className="col-3 d-flex">
               <button
                 className="btn btn-success me-2"
                 onClick={handleAddChoice}

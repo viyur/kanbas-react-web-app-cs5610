@@ -75,7 +75,6 @@ export default function QuizDetailsEdit() {
 
   return (
     <div>
-      <div>{quiz.published === true ? "Published" : "Unpublished"}</div>
       <div className="mt-2 mb-3">
         {" "}
         <EditNavigation />

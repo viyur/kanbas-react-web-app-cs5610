@@ -3,6 +3,7 @@ import QuizList from "./QuizList";
 import QuizDetails from "./QuizDetails";
 import QuizDetailsEdit from "./QuizDetailsEdit";
 import QuestionEditForm from "./Questions/QuestionEditForm";
+import QuizPreview from "./QuizPreview";
 
 export default function Quizzes() {
   const { cid } = useParams();
@@ -16,8 +17,11 @@ export default function Quizzes() {
           <Route path=":quizId" element={<QuizDetails />} />
           {/* 编辑单个 quiz `/Kanbas/Courses/${cid}/Quizzes/${quizId}/Edit`*/}
           <Route path=":quizId/Edit/*" element={<QuizDetailsEdit />} />
-          {/* for edit questions */}
+          {/* for preview the quiz content */}
+          <Route path=":quizId/Preview" element={<QuizPreview />} />
+          {/* for add new quiz question */}
           <Route path=":quizId/questionedit" element={<QuestionEditForm />} />
+          {/* for edit existing quiz question */}
           <Route
             path=":quizId/questionedit/:questionId"
             element={<QuestionEditForm />}

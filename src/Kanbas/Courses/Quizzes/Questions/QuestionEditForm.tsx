@@ -20,7 +20,7 @@ export default function QuestionEditForm() {
     points: 0,
     question: "",
     choices: [],
-    blackAnswers: [],
+    blankAnswers: [],
     trueFalseAnswer: false,
   });
 
@@ -36,32 +36,50 @@ export default function QuestionEditForm() {
     }
   };
 
-  // function to examine question type
-  const checkQuestionType = (q: any) => {
-    let newQuestion = { ...q };
-    switch (q.questionType) {
-      case "Multiple Choice":
-        newQuestion.blankAnswers = [];
-        newQuestion.trueFalseAnswer = false;
-        break;
-      case "True/False":
-        newQuestion.choices = [];
-        newQuestion.blankAnswers = [];
-        break;
-      case "Fill in the blank":
-        newQuestion.choices = [];
-        newQuestion.trueFalseAnswer = false;
-        break;
-      default:
-        console.warn("Unknown question type:", q.questionType);
-        break;
+  // function to check if question is valid
+  const checkQuestion = (q: any) => {
+    if (!q.questionType) {
+      alert("Please select a question type!");
+      return null;
     }
-    return newQuestion;
+    if (!q.title) {
+      alert("Please enter a question title!");
+      return null;
+    }
+
+    if (q.questionType === "Multiple Choice" && !q.choices.length) {
+      alert("Please enter at least one choice!");
+      return null;
+    }
+
+    // if question type is multiple choice and choices object must have one choice with isCorrect to be true
+    if (
+      q.questionType === "Multiple Choice" &&
+      q.choices.length &&
+      !q.choices.find((choice: any) => choice.isCorrect)
+    ) {
+      alert("Please select one correct choice!");
+      return null;
+    }
+
+    if (q.questionType === "Fill in the blank" && !q.blankAnswers.length) {
+      alert("Please enter at least one possible answer!");
+      return null;
+    }
+
+    if (!q.question) {
+      alert("Please enter a question in Question Text Editor!");
+      return null;
+    }
+
+    return q;
   };
   // Add a new question to the quiz with axios
   const createNewQuestion = async () => {
     try {
-      const newQuestion = checkQuestionType(q);
+      const newQuestion = checkQuestion(q);
+      if (!newQuestion) return;
+
       const question = await QuizClient.createQuestionForQuiz(
         quizId as string,
         newQuestion
@@ -77,7 +95,8 @@ export default function QuestionEditForm() {
   // Update an existing question with axios
   const updateQuestion = async () => {
     try {
-      const newQuestion = checkQuestionType(q);
+      const newQuestion = checkQuestion(q);
+      if (!newQuestion) return;
       const question = await QuestionClient.updateQuestion(
         questionId as string,
         newQuestion
@@ -120,6 +139,7 @@ export default function QuestionEditForm() {
               placeholder="Enter question title"
               onChange={handleInputChange}
               className="form-control"
+              required
             />
           </div>
           {/* Question Type Selector */}
@@ -129,6 +149,7 @@ export default function QuestionEditForm() {
               value={q.questionType}
               onChange={handleInputChange}
               className="form-select"
+              required
             >
               <option value="Multiple Choice">Multiple Choice</option>
               <option value="True/false">True/False</option>
@@ -148,6 +169,7 @@ export default function QuestionEditForm() {
                 min={0}
                 onChange={handleInputChange}
                 className="form-control w-25"
+                required
               />
               <span className="input-group-text">
                 {" "}
@@ -170,27 +192,35 @@ export default function QuestionEditForm() {
       <br />
       <hr />
       {/* buttons at the bottom */}
-      <div>
-        <button
-          onClick={() =>
-            navigate(`/Kanbas/Courses/${cid}/Quizzes/${quizId}/Edit/questions`)
-          }
-        >
-          cancel
-        </button>
+      <div className="container">
+        <div className="row">
+          <div className="col d-flex">
+            <button
+              className="btn btn-secondary me-2"
+              onClick={() =>
+                navigate(
+                  `/Kanbas/Courses/${cid}/Quizzes/${quizId}/Edit/questions`
+                )
+              }
+            >
+              cancel
+            </button>
+
+            {/* button for add new question */}
+            {!questionId && (
+              <button className="btn btn-danger" onClick={createNewQuestion}>
+                Sure
+              </button>
+            )}
+            {/* button for update old question */}
+            {questionId && (
+              <button className="btn btn-danger" onClick={updateQuestion}>
+                Update
+              </button>
+            )}
+          </div>
+        </div>
       </div>
-      {/* button for add new question */}
-      {!questionId && (
-        <div>
-          <button onClick={createNewQuestion}>Add</button>
-        </div>
-      )}
-      {/* button for update old question */}
-      {questionId && (
-        <div>
-          <button onClick={updateQuestion}>Update</button>
-        </div>
-      )}
       {/* end */}
     </div>
   );

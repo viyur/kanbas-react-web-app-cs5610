@@ -1,6 +1,7 @@
 import Nav from "react-bootstrap/Nav";
 import { Link, useParams, useLocation } from "react-router-dom";
 
+// component to give navigation for QuizDetailsEdit screen
 export default function EditNavigation() {
   const { cid, quizId } = useParams();
   const location = useLocation(); // Get current location

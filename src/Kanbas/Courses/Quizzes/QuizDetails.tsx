@@ -1,13 +1,15 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import * as QuizClient from "./client";
 import { GrEdit } from "react-icons/gr";
 
-//  `/kanbas/courses/${cid}/quizzes/${quizId}` => QuizDetails Screen
+//  `/Kanbas/Courses/${cid}/Quizzes/${quizId}` => QuizDetails Screen
+// can go to QuizDetailsEdit screen if click on Edit
 export default function QuizDetails() {
   const { cid, quizId } = useParams();
   const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const navigate = useNavigate();
   const isFaculty = currentUser.role.toUpperCase() === "FACULTY";
   const isStudent = currentUser.role.toUpperCase() === "STUDENT";
   const [quiz, setQuiz] = useState<any>({
@@ -85,7 +87,12 @@ export default function QuizDetails() {
         <div className="container mt-3">
           <div className="row justify-content-center">
             <div className="col-6 ">
-              <button className="float-end btn btn-sm btn-primary">
+              <button
+                className="float-end btn btn-sm btn-primary"
+                onClick={() => {
+                  navigate(`/Kanbas/Courses/${cid}/Quizzes/${quizId}/Preview`);
+                }}
+              >
                 {" "}
                 Preview{" "}
               </button>
