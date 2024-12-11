@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import * as QuizClient from "./client";
 import { useEffect, useState } from "react";
 import { Form, Button, Container, Row, Col, Card } from "react-bootstrap";
+import ReactQuill from "react-quill";
 
 // `/Kanbas/Courses/${cid}/Quizzes/${quizId}/Edit` => QuizEditForm Screen
 export default function QuizEditForm({
@@ -69,6 +70,15 @@ export default function QuizEditForm({
       [name]: checked,
     }));
   };
+
+  // React Quill Editor onChange
+  const handleDescriptionChange = (content: string) => {
+    setQuiz((prev: any) => ({
+      ...prev,
+      description: content,
+    }));
+  };
+
   return (
     <Container className="mt-4">
       <Form>
@@ -89,7 +99,7 @@ export default function QuizEditForm({
 
         <Row className="mb-3">
           <Col>
-            <Form.Group controlId="quizDescription">
+            {/* <Form.Group controlId="quizDescription">
               <Form.Label>Description</Form.Label>
               <Form.Control
                 as="textarea"
@@ -97,6 +107,16 @@ export default function QuizEditForm({
                 name="description"
                 value={quiz.description}
                 onChange={handleInputChange}
+              />
+            </Form.Group> */}
+            <Form.Group controlId="quizDescription">
+              <Form.Label>Description</Form.Label>
+              {/* 替换为 React Quill */}
+              <ReactQuill
+                value={quiz.description}
+                onChange={handleDescriptionChange}
+                placeholder="Enter quiz description here..."
+                theme="snow"
               />
             </Form.Group>
           </Col>

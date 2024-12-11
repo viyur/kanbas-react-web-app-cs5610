@@ -12,6 +12,7 @@ export default function QuizQuestionsEditor() {
   const { cid, quizId } = useParams();
   const [questions, setQuestions] = useState<any[]>([]);
   const [totalPoints, setTotalPoints] = useState(0);
+  const [quiz, setQuiz] = useState<any>({});
   const navigate = useNavigate();
 
   // Fetch all questions for the quiz with axios
@@ -46,8 +47,44 @@ export default function QuizQuestionsEditor() {
     }
   };
 
+  // Function to fetch quiz
+  const fetchQuiz = async () => {
+    if (!quizId) {
+      console.error("Quiz ID is not available when fetching quiz.");
+      return;
+    }
+    try {
+      const quiz = await QuizClient.findQuizById(quizId as string);
+      setQuiz(quiz);
+    } catch (error: any) {
+      setQuiz({});
+      console.error(
+        "Error fetching quiz:",
+        error.response?.data || error.message
+      );
+    }
+  };
+
+  // function to update the quiz if total score changes
+  const updateQuiz = async () => {
+    try {
+      // Update the quiz with the new total score
+      const quizWithNewTotal = { ...quiz, points: totalPoints };
+      const updatedQuiz = await QuizClient.updateQuiz(
+        quizId as string,
+        quizWithNewTotal
+      );
+      // setQuiz(updatedQuiz);
+    } catch (error: any) {
+      console.error("Error updating quiz:", error);
+    } finally {
+      navigate(`/kanbas/courses/${cid}/Quizzes/${quizId}`);
+    }
+  };
+
   // call the fetchQuestions function
   useEffect(() => {
+    fetchQuiz();
     fetchQuestions();
   }, [quizId]);
 
@@ -127,12 +164,7 @@ export default function QuizQuestionsEditor() {
               Cancel
             </button>
 
-            <button
-              onClick={() => {
-                navigate(`/Kanbas/Courses/${cid}/Quizzes/${quizId}`);
-              }}
-              className="btn btn-danger ms-3"
-            >
+            <button onClick={updateQuiz} className="btn btn-danger ms-3">
               Save
             </button>
           </div>
