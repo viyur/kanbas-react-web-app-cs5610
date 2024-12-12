@@ -86,7 +86,8 @@ export default function QuestionEditForm() {
       );
       // setQ(question);
       // Navigate to the questions list page
-      navigate(`/Kanbas/Courses/${cid}/Quizzes/${quizId}/Edit/questions`);
+      // navigate(`/Kanbas/Courses/${cid}/Quizzes/${quizId}/Edit/questions`);
+      navigate(-1);
     } catch (error: any) {
       console.error("Error creating question:", error);
     }
@@ -103,7 +104,8 @@ export default function QuestionEditForm() {
       );
       setQ(question);
       // Navigate to the questions list page
-      navigate(`/Kanbas/Courses/${cid}/Quizzes/${quizId}/Edit/questions`);
+      // navigate(`/Kanbas/Courses/${cid}/Quizzes/${quizId}/Edit/questions`);
+      navigate(-1);
     } catch (error: any) {
       console.error("Error updating question:", error);
     }
