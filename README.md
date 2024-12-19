@@ -24,7 +24,7 @@ To run the project locally and enable all functionalities, follow these steps:
 3. Use the `quiz` branch in both the frontend and backend repositories for full feature support.
 
 ### Environment Variables
-Create a `.env` file in the root directory of this project and add the following variable:
+Create a `.env.local` file in the root directory of this project and add the following variable:
 ```env
 REACT_APP_REMOTE_SERVER=http://localhost:4000
 ```
